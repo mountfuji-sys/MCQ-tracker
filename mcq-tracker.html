@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MCQ Tracker" />
+  <meta name="theme-color" content="#111111" />
+  <title>MCQ Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- App Icon: A/B/C/D MCQ bubbles -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23111111'/%3E%3Ccircle cx='148' cy='164' r='72' fill='%238b5cf6'/%3E%3Ctext x='148' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='white'%3EA%3C/text%3E%3Ccircle cx='364' cy='164' r='72' fill='%231e1e1e'/%3E%3Ccircle cx='364' cy='164' r='66' fill='none' stroke='%238b5cf6' stroke-width='6'/%3E%3Ctext x='364' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23888888'%3EB%3C/text%3E%3Ccircle cx='148' cy='348' r='72' fill='%231e1e1e'/%3E%3Ccircle cx='148' cy='348' r='66' fill='none' stroke='%238b5cf6' stroke-width='6'/%3E%3Ctext x='148' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23888888'%3EC%3C/text%3E%3Ccircle cx='364' cy='348' r='72' fill='%2300e5c0'/%3E%3Ctext x='364' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23111111'%3ED%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%23111111'/%3E%3Ccircle cx='148' cy='164' r='72' fill='%238b5cf6'/%3E%3Ctext x='148' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='white'%3EA%3C/text%3E%3Ccircle cx='364' cy='164' r='72' fill='%231e1e1e'/%3E%3Ccircle cx='364' cy='164' r='66' fill='none' stroke='%238b5cf6' stroke-width='6'/%3E%3Ctext x='364' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23888888'%3EB%3C/text%3E%3Ccircle cx='148' cy='348' r='72' fill='%231e1e1e'/%3E%3Ccircle cx='148' cy='348' r='66' fill='none' stroke='%238b5cf6' stroke-width='6'/%3E%3Ctext x='148' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23888888'%3EC%3C/text%3E%3Ccircle cx='364' cy='348' r='72' fill='%2300e5c0'/%3E%3Ctext x='364' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='%23111111'%3ED%3C/text%3E%3C/svg%3E" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #111; color: #fff; font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input::placeholder { color: #555; }
+    ::-webkit-scrollbar { display: none; }
+    #app { max-width: 430px; margin: 0 auto; padding-bottom: 50px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; padding: 20px 16px 0; }
+    .tab-btn {
+      flex: 1; padding: 13px; border-radius: 12px; border: none;
+      font-weight: 600; font-size: 15px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+    }
+    .tab-btn.active { background: #8b5cf6; color: #fff; }
+    .tab-btn.inactive { background: #1e1e1e; color: #888; }
+
+    /* Streak row */
+    .streak-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px 8px;
+    }
+    .streak-label { color: #888; font-size: 11px; letter-spacing: 1.5px; }
+    .streak-value { color: #f59e0b; font-size: 22px; font-weight: 700; }
+    .goal-box {
+      background: #2a2a2a; border-radius: 8px; padding: 6px 16px;
+      font-size: 18px; font-weight: 700; font-family: 'DM Mono', monospace;
+      cursor: pointer; border: none; color: #fff;
+    }
+    .goal-input {
+      width: 70px; background: #333; border: 1px solid #8b5cf6;
+      color: #fff; border-radius: 8px; padding: 6px 10px;
+      font-size: 16px; font-weight: 700; font-family: 'DM Mono', monospace;
+      text-align: center;
+    }
+
+    /* Donut */
+    .donut-wrap { display: flex; justify-content: center; margin: 8px 0 0; }
+    .motivational { text-align: center; color: #aaa; font-style: italic; margin-bottom: 16px; }
+
+    /* Card */
+    .card { background: #1e1e1e; border-radius: 16px; padding: 16px; margin: 0 16px 12px; }
+    .label { color: #888; font-size: 13px; margin-bottom: 8px; }
+    .source-picker-btn {
+      background: #2a2a2a; border-radius: 10px; padding: 14px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; margin-bottom: 12px; border: none; width: 100%;
+      color: #fff; font-size: 16px; font-family: 'DM Sans', sans-serif;
+    }
+    .count-input {
+      width: 100%; background: #2a2a2a; border: none;
+      color: #fff; border-radius: 10px; padding: 14px 16px;
+      font-size: 16px; margin-bottom: 14px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .log-btn {
+      flex: 1; background: #8b5cf6; border: none; color: #fff;
+      border-radius: 12px; padding: 16px; font-size: 16px;
+      font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      active-opacity: 0.8;
+    }
+    .log-btn:active { background: #7c3aed; }
+    .undo-btn {
+      width: 54px; background: #f59e0b; border: none; color: #fff;
+      border-radius: 12px; font-size: 20px; cursor: pointer;
+    }
+    .undo-btn:active { background: #d97706; }
+
+    /* History */
+    .history { padding: 0 16px; }
+    .day-row {
+      background: #1e1e1e; border-radius: 12px; padding: 16px 20px;
+      margin-bottom: 8px; display: flex; justify-content: space-between;
+      align-items: center;
+    }
+    .day-date { color: #ccc; }
+    .day-right { display: flex; align-items: center; gap: 12px; }
+    .day-count { color: #888; font-family: 'DM Mono', monospace; }
+    .day-dot { width: 14px; height: 14px; border-radius: 50%; }
+
+    /* Analytics */
+    .analytics-wrap { padding: 16px 16px 0; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: #1e1e1e; border-radius: 14px; padding: 20px 16px; }
+    .stat-value { color: #8b5cf6; font-size: 28px; font-weight: 700; font-family: 'DM Mono', monospace; }
+    .stat-label { color: #888; font-size: 11px; letter-spacing: 1.5px; margin-top: 4px; }
+    .section-card { background: #1e1e1e; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .section-title { color: #888; font-size: 11px; letter-spacing: 1.5px; margin-bottom: 12px; }
+    .activity-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .activity-cell { height: 40px; border-radius: 8px; }
+    .source-row {
+      display: flex; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #2a2a2a;
+    }
+    .source-name { color: #ccc; }
+    .source-count { color: #00e5c0; font-weight: 700; font-family: 'DM Mono', monospace; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: flex; align-items: flex-end; z-index: 100;
+    }
+    .modal-sheet {
+      background: #1e1e1e; border-radius: 20px 20px 0 0;
+      width: 100%; max-width: 430px; margin: 0 auto;
+      padding: 8px 0 34px;
+    }
+    .modal-option {
+      padding: 18px 24px; display: flex; justify-content: space-between;
+      align-items: center; cursor: pointer; border-bottom: 1px solid #2a2a2a;
+      font-size: 17px;
+    }
+    .radio-outer {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .radio-inner { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+
+    /* Goal label */
+    .goal-label { color: #888; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const SOURCES = [
+  "Marrow Qbank",
+  "Marrow Custom",
+  "Doctutorials",
+  "Prepladder",
+  "Cerebellum",
+  "Reflex",
+  "GT",
+  "Misc"
+];
+
+const DEFAULT_GOAL = 200;
+
+// ── helpers ──────────────────────────────────────────────
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function formatDate(d) {
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y.slice(2)}`;
+}
+
+function getLogs() {
+  try { return JSON.parse(localStorage.getItem("mcq_logs") || "[]"); }
+  catch { return []; }
+}
+function saveLogs(logs) { localStorage.setItem("mcq_logs", JSON.stringify(logs)); }
+function getGoal() { return parseInt(localStorage.getItem("mcq_goal") || DEFAULT_GOAL); }
+function saveGoal(g) { localStorage.setItem("mcq_goal", String(g)); }
+
+function getTodayCount(logs) {
+  return logs.filter(l => l.date === todayStr()).reduce((s, l) => s + l.count, 0);
+}
+
+function getDailyTotals(logs) {
+  const map = {};
+  logs.forEach(l => { map[l.date] = (map[l.date] || 0) + l.count; });
+  return map;
+}
+
+function getStreak(logs) {
+  const days = [...new Set(logs.map(l => l.date))].sort().reverse();
+  if (!days.length) return 0;
+  let streak = 0;
+  let cur = new Date(); cur.setHours(0,0,0,0);
+  for (let d of days) {
+    const dd = new Date(d); dd.setHours(0,0,0,0);
+    const diff = Math.round((cur - dd) / 86400000);
+    if (diff === 0 || diff === 1) { streak++; cur = dd; } else break;
+  }
+  return streak;
+}
+
+function getBestStreak(logs) {
+  const days = [...new Set(logs.map(l => l.date))].sort();
+  if (!days.length) return 0;
+  let best = 1, cur = 1;
+  for (let i = 1; i < days.length; i++) {
+    const diff = Math.round((new Date(days[i]) - new Date(days[i-1])) / 86400000);
+    if (diff === 1) { cur++; best = Math.max(best, cur); } else cur = 1;
+  }
+  return best;
+}
+
+function getLast28Days() {
+  const days = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+// ── state ────────────────────────────────────────────────
+let state = {
+  tab: "tracker",
+  logs: getLogs(),
+  goal: getGoal(),
+  source: SOURCES[0],
+  count: "",
+  showSourcePicker: false,
+  editGoal: false,
+  goalInput: String(getGoal()),
+};
+
+function setState(patch) {
+  state = { ...state, ...patch };
+  render();
+}
+
+// ── donut svg ────────────────────────────────────────────
+function donutSVG(value, max) {
+  const r = 80, stroke = 14;
+  const circ = 2 * Math.PI * r;
+  const pct = Math.min(value / max, 1);
+  const dash = pct * circ;
+  return `
+    <svg width="220" height="220" viewBox="0 0 220 220">
+      <circle cx="110" cy="110" r="${r}" fill="none" stroke="#2a2a2a" stroke-width="${stroke}"/>
+      <circle cx="110" cy="110" r="${r}" fill="none" stroke="#00e5c0"
+        stroke-width="${stroke}"
+        stroke-dasharray="${dash} ${circ}"
+        stroke-linecap="round"
+        transform="rotate(-90 110 110)"
+        style="transition: stroke-dasharray 0.6s ease"/>
+      <text x="110" y="100" text-anchor="middle" fill="#00e5c0" font-size="28" font-weight="700" font-family="DM Mono, monospace">${value} / ${max}</text>
+      <text x="110" y="126" text-anchor="middle" fill="#888" font-size="11" letter-spacing="2" font-family="DM Sans, sans-serif">TODAY'S TARGET</text>
+    </svg>`;
+}
+
+// ── activity grid ─────────────────────────────────────────
+function activityGridHTML(logs, goal) {
+  const days = getLast28Days();
+  const totals = getDailyTotals(logs);
+  return days.map(d => {
+    const count = totals[d] || 0;
+    const intensity = count === 0 ? 0 : count >= goal ? 1 : count / goal;
+    let bg = "#2a2a2a";
+    if (intensity > 0) {
+      const g = Math.round(120 + intensity * 100);
+      bg = `rgb(${Math.round(20 + (1-intensity)*80)}, ${g}, ${Math.round(20 + (1-intensity)*30)})`;
+    }
+    return `<div class="activity-cell" style="background:${bg}" title="${formatDate(d)}: ${count} MCQs"></div>`;
+  }).join("");
+}
+
+// ── render ───────────────────────────────────────────────
+function render() {
+  const { tab, logs, goal, source, count, showSourcePicker, editGoal, goalInput } = state;
+  const todayCount = getTodayCount(logs);
+  const streak = getStreak(logs);
+  const bestStreak = getBestStreak(logs);
+  const totalMCQs = logs.reduce((s, l) => s + l.count, 0);
+  const last7 = logs.filter(l => {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    return new Date(l.date) >= cutoff;
+  });
+  const last7Days = [...new Set(last7.map(l => l.date))];
+  const dailyAvg = last7Days.length
+    ? Math.round(last7.reduce((s,l) => s+l.count, 0) / last7Days.length) : 0;
+  const daysActive = [...new Set(logs.map(l => l.date))].length;
+
+  const sourceBreakdown = {};
+  logs.forEach(l => { sourceBreakdown[l.source] = (sourceBreakdown[l.source]||0) + l.count; });
+  const sortedSources = Object.entries(sourceBreakdown).sort((a,b) => b[1]-a[1]);
+
+  const dailyTotals = getDailyTotals(logs);
+  const sortedDays = Object.keys(dailyTotals).sort().reverse();
+
+  const motivational = todayCount === 0 ? "Start strong! 💪"
+    : todayCount >= goal ? "Goal crushed! 🎉"
+    : todayCount / goal > 0.5 ? "Awesome progress! 🔥"
+    : "Keep going! 🚀";
+
+  const goalControl = editGoal
+    ? `<input class="goal-input" id="goalInput" type="number" value="${goalInput}" />`
+    : `<button class="goal-box" id="editGoalBtn">${goal}</button>`;
+
+  const trackerHTML = `
+    <div class="streak-row">
+      <div>
+        <div class="streak-label">ONGOING STREAK</div>
+        <div class="streak-value">${streak} Days 🔥</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="goal-label">Goal:</span>
+        ${goalControl}
+      </div>
+    </div>
+
+    <div class="donut-wrap">${donutSVG(todayCount, goal)}</div>
+    <div class="motivational">${motivational}</div>
+
+    <div class="card">
+      <div class="label">Source</div>
+      <button class="source-picker-btn" id="sourceBtn">
+        <span>${source}</span><span style="color:#888">▼</span>
+      </button>
+      <div class="label">Count</div>
+      <input class="count-input" id="countInput" type="number" placeholder="e.g. 50" value="${count}" />
+      <div class="btn-row">
+        <button class="log-btn" id="logBtn">LOG MCQs</button>
+        <button class="undo-btn" id="undoBtn" title="Undo last log">↩</button>
+      </div>
+    </div>
+
+    <div class="history">
+      ${sortedDays.map(d => {
+        const dt = dailyTotals[d];
+        const hit = dt >= goal;
+        return `<div class="day-row">
+          <span class="day-date">${formatDate(d)} ▾</span>
+          <div class="day-right">
+            <span class="day-count">${dt} / ${goal}</span>
+            <div class="day-dot" style="background:${hit ? '#00e5c0' : '#f59e0b'}"></div>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>
+  `;
+
+  const analyticsHTML = `
+    <div class="analytics-wrap">
+      <div class="stats-grid">
+        ${[
+          {label:"TOTAL MCQS", value: totalMCQs.toLocaleString()},
+          {label:"DAILY AVG (7D)", value: dailyAvg},
+          {label:"BEST STREAK", value: bestStreak},
+          {label:"DAYS ACTIVE", value: daysActive},
+        ].map(s => `
+          <div class="stat-card">
+            <div class="stat-value">${s.value}</div>
+            <div class="stat-label">${s.label}</div>
+          </div>`).join("")}
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">LAST 28 DAYS ACTIVITY</div>
+        <div class="activity-grid">${activityGridHTML(logs, goal)}</div>
+      </div>
+
+      ${sortedSources.length > 0 ? `
+      <div class="section-card">
+        <div class="section-title">SOURCE BREAKDOWN (ALL TIME)</div>
+        ${sortedSources.map(([src, cnt]) => `
+          <div class="source-row">
+            <span class="source-name">${src}</span>
+            <span class="source-count">${cnt}</span>
+          </div>`).join("")}
+      </div>` : ""}
+    </div>
+  `;
+
+  const modalHTML = showSourcePicker ? `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-sheet" id="modalSheet">
+        ${SOURCES.map(s => `
+          <div class="modal-option" data-source="${s}">
+            <span>${s}</span>
+            <div class="radio-outer" style="border:2px solid ${source===s?'#8b5cf6':'#555'};background:${source===s?'#8b5cf6':'transparent'}">
+              ${source===s ? '<div class="radio-inner"></div>' : ''}
+            </div>
+          </div>`).join("")}
+      </div>
+    </div>` : "";
+
+  document.getElementById("app").innerHTML = `
+    <div class="tabs">
+      <button class="tab-btn ${tab==='tracker'?'active':'inactive'}" id="tabTracker">📊 Tracker</button>
+      <button class="tab-btn ${tab==='analytics'?'active':'inactive'}" id="tabAnalytics">📈 Analytics</button>
+    </div>
+    ${tab === "tracker" ? trackerHTML : analyticsHTML}
+    ${modalHTML}
+  `;
+
+  attachEvents();
+}
+
+// ── events ───────────────────────────────────────────────
+function attachEvents() {
+  const { goal } = state;
+
+  document.getElementById("tabTracker")?.addEventListener("click", () => setState({tab:"tracker"}));
+  document.getElementById("tabAnalytics")?.addEventListener("click", () => setState({tab:"analytics"}));
+
+  // Goal editing
+  document.getElementById("editGoalBtn")?.addEventListener("click", () => {
+    setState({editGoal:true, goalInput:String(state.goal)});
+    setTimeout(() => document.getElementById("goalInput")?.focus(), 50);
+  });
+  document.getElementById("goalInput")?.addEventListener("blur", saveGoalInput);
+  document.getElementById("goalInput")?.addEventListener("keydown", e => { if(e.key==="Enter") saveGoalInput(); });
+  document.getElementById("goalInput")?.addEventListener("input", e => { state.goalInput = e.target.value; });
+
+  // Source picker
+  document.getElementById("sourceBtn")?.addEventListener("click", () => setState({showSourcePicker:true}));
+  document.getElementById("modalOverlay")?.addEventListener("click", e => {
+    if (e.target.id === "modalOverlay") setState({showSourcePicker:false});
+  });
+  document.querySelectorAll(".modal-option").forEach(el => {
+    el.addEventListener("click", () => {
+      setState({source: el.dataset.source, showSourcePicker:false});
+    });
+  });
+
+  // Count input
+  document.getElementById("countInput")?.addEventListener("input", e => { state.count = e.target.value; });
+  document.getElementById("countInput")?.addEventListener("keydown", e => { if(e.key==="Enter") logMCQs(); });
+
+  // Buttons
+  document.getElementById("logBtn")?.addEventListener("click", logMCQs);
+  document.getElementById("undoBtn")?.addEventListener("click", undoLast);
+}
+
+function saveGoalInput() {
+  const g = parseInt(state.goalInput);
+  if (g > 0) { saveGoal(g); setState({goal:g, editGoal:false}); }
+  else setState({editGoal:false});
+}
+
+function logMCQs() {
+  const n = parseInt(state.count);
+  if (!n || n <= 0) return;
+  const logs = [...state.logs, { date: todayStr(), source: state.source, count: n, id: Date.now() }];
+  saveLogs(logs);
+  setState({logs, count:""});
+}
+
+function undoLast() {
+  const todayLogs = state.logs.filter(l => l.date === todayStr());
+  if (!todayLogs.length) return;
+  const lastId = todayLogs[todayLogs.length-1].id;
+  const logs = state.logs.filter(l => l.id !== lastId);
+  saveLogs(logs);
+  setState({logs});
+}
+
+// ── init ─────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
+<script>
+// ── PWA Manifest (injected inline so single-file still works) ──
+const iconSVG = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='#111111'/><circle cx='148' cy='164' r='72' fill='#8b5cf6'/><text x='148' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='white'>A</text><circle cx='364' cy='164' r='72' fill='#1e1e1e'/><circle cx='364' cy='164' r='66' fill='none' stroke='#8b5cf6' stroke-width='6'/><text x='364' y='185' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='#888888'>B</text><circle cx='148' cy='348' r='72' fill='#1e1e1e'/><circle cx='148' cy='348' r='66' fill='none' stroke='#8b5cf6' stroke-width='6'/><text x='148' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='#888888'>C</text><circle cx='364' cy='348' r='72' fill='#00e5c0'/><text x='364' y='369' text-anchor='middle' font-family='Arial Black,Arial' font-size='72' font-weight='900' fill='#111111'>D</text></svg>`);
+const iconURL = `data:image/svg+xml,${iconSVG}`;
+const manifest = {
+  name: "MCQ Tracker",
+  short_name: "MCQ Tracker",
+  description: "Track your daily MCQ practice",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#111111",
+  theme_color: "#111111",
+  icons: [{ src: iconURL, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type: "application/json"});
+const manifestURL = URL.createObjectURL(manifestBlob);
+const manifestLink = document.createElement("link");
+manifestLink.rel = "manifest"; manifestLink.href = manifestURL;
+document.head.appendChild(manifestLink);
+</script>
