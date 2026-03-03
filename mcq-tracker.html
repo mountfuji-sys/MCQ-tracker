@@ -156,7 +156,7 @@ const SOURCES = [
 const DEFAULT_GOAL = 200;
 
 // ── helpers ──────────────────────────────────────────────
-function todayStr() { return new Date().toISOString().slice(0, 10); }
+function todayStr() { const now = new Date(); const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })); return ist.getFullYear() + "-" + String(ist.getMonth()+1).padStart(2,"0") + "-" + String(ist.getDate()).padStart(2,"0"); }
 
 function formatDate(d) {
   const [y, m, day] = d.split("-");
